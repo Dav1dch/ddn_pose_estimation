@@ -13,6 +13,7 @@ def gen_tuple(train, scene, seqLength):
     queries = []
     sceneDir = os.path.join(rootDir, scene)
     rgbDir = os.path.join(sceneDir, "color_")
+    depthDir = os.path.join(sceneDir, "depth")
     if train:
         iou = np.load(os.path.join(iouDir, "train_" + scene + "_iou.npy"))
         poseDir = os.path.join(rootDir, scene, "train", "pose")
@@ -31,6 +32,11 @@ def gen_tuple(train, scene, seqLength):
     pclList.sort()
     rgbList = [
         os.path.join(rgbDir, p.split("/")[-1].replace("pose.txt", "color.png"))
+        for p in poseList
+    ]
+
+    depthList = [
+        os.path.join(depthDir, p.split("/")[-1].replace("pose.txt", "depth.png"))
         for p in poseList
     ]
 
@@ -62,8 +68,9 @@ def gen_tuple(train, scene, seqLength):
             {
                 "id": anchorNdx,
                 "rgb": rgbList[anchorNdx],
-                "pcl": pclList[anchorNdx],
-                "pose": pclList[anchorNdx],
+                "depth": depthList[anchorNdx],
+                "pcl": os.path.join(pclDir, pclList[anchorNdx]),
+                "pose": os.path.join(poseDir, poseList[anchorNdx]),
                 "positives": positives,
                 "nonNegatives": nonNegatives,
                 "negatives": negatives,
