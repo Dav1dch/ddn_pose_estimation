@@ -88,6 +88,7 @@ def Dy(f, x, y):
                 .contiguous()
                 .unsqueeze(1)
             )  # bx1xm
+            print(grad(DYf_i, y, create_graph=True))
             DXYf[:, i : (i + 1), :] = (
                 grad(DYf_i, x, grad_outputs=grad_outputs, create_graph=True)[0]
                 .contiguous()
@@ -96,11 +97,13 @@ def Dy(f, x, y):
     DYYf = DYYf.detach()
     DXYf = DXYf.detach()
     DYYf = 0.5 * (DYYf + DYYf.transpose(1, 2))  # In case of floating point errors
+    print(DYYf)
 
     # Try a batchwise solve, otherwise revert to looping
     # Avoids cuda runtime error (9): invalid configuration argument
     try:
-        U = torch.cholesky(DYYf, upper=True)
+        U = torch.linalg.cholesky(DYYf).mH
+        print(U)
         Dy_at_x = torch.cholesky_solve(-1.0 * DXYf, U, upper=True)  # bxmxn
     except:
         Dy_at_x = torch.empty_like(DXYf)
@@ -108,7 +111,7 @@ def Dy(f, x, y):
             DYYf.size(0)
         ):  # For some reason, doing this in a loop doesn't crash
             try:
-                U = torch.cholesky(DYYf[i, ...], upper=True)
+                U = torch.linalg.cholesky(DYYf[i, ...]).mH
                 Dy_at_x[i, ...] = torch.cholesky_solve(
                     -1.0 * DXYf[i, ...], U, upper=True
                 )
@@ -178,11 +181,11 @@ class NonlinearWeightedBlindPnPFn(torch.autograd.Function):
             # It would be better to use group norms for the stopping conditions
             opt = torch.optim.LBFGS(
                 [theta],
-                lr=0.01,  # Default: 1
-                max_iter=max_iter,  # Default: 100
+                lr=1,  # Default: 1
+                max_iter=1000,  # Default: 100
                 max_eval=None,
-                tolerance_grad=1e-40,  # Default: 1e-05
-                tolerance_change=1e-40,  # Default: 1e-09
+                tolerance_grad=1e-03,  # Default: 1e-05
+                tolerance_change=1e-03,  # Default: 1e-09
                 history_size=100,
                 line_search_fn="strong_wolfe",
             )
@@ -214,12 +217,12 @@ class NonlinearWeightedBlindPnPFn(torch.autograd.Function):
                 W = W.detach().requires_grad_()
                 theta = theta.detach().requires_grad_()
                 fn_at_theta = weightedAngularReprojectionError(W, p2d, p3d, theta)  # b
-            # print(W)
             Dtheta = Dy(fn_at_theta, W, theta)  # bx6xmn
             grad_input = torch.einsum(
                 "ab,abc->ac", (grad_output, Dtheta)
             )  # bx6 * bx6xmn-> bxmn
             grad_input = grad_input.reshape(b, m)
+        print(grad_input)
         return grad_input, None, None, None
 
 
