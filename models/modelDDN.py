@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-import cv2.cv2 as cv
+import cv2 as cv
 import ddn.pytorch.geometry_utilities as geo
 from math import degrees
 
