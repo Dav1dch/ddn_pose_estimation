@@ -58,14 +58,16 @@ def make_collate_fn(dataset):
             if dataset[p[1]]["id"] in dataset[p[0]]["positives"]:
                 image1.append(
                     torch.tensor(
-                        cv.imread(dataset[p[0]]["rgb"], 0) / 255,
+                        # cv.imread(dataset[p[0]]["rgb"], 0) / 255,
+                        cv.imread(dataset[p[0]]["rgb"]),
                         dtype=torch.float32,
                         device="cuda",
                     ).unsqueeze(0)
                 )
                 image2.append(
                     torch.tensor(
-                        cv.imread(dataset[p[1]]["rgb"], 0) / 255,
+                        # cv.imread(dataset[p[1]]["rgb"], 0) / 255,
+                        cv.imread(dataset[p[1]]["rgb"]),
                         dtype=torch.float32,
                         device="cuda",
                     ).unsqueeze(0)
@@ -102,6 +104,17 @@ def make_collate_fn(dataset):
                 index1.append(torch.tensor(p[0]).cuda())
                 index2.append(torch.tensor(p[1]).cuda())
 
+        if len(index1) == 0:
+            return (
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+            )
         return (
             torch.stack(index1),
             torch.stack(index2),
@@ -130,13 +143,13 @@ def make_dataloader(params):
 
     samplers["train"] = BatchSampler(
         sampler=RandomSampler(range(len(datasets["train"]))),
-        batch_size=16,
+        batch_size=12,
         drop_last=False,
     )
 
     samplers["test"] = BatchSampler(
         sampler=RandomSampler(range(len(datasets["test"]))),
-        batch_size=16,
+        batch_size=12,
         drop_last=False,
     )
 

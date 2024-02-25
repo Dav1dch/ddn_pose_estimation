@@ -46,7 +46,8 @@ def gen_tuple(train, scene, seqLength):
         nonNegatives = []
         labels = list(range(iou.shape[0]))
         for ndx in range(iou.shape[1]):
-            if ndx == anchorNdx or (ndx // seqLength) == (anchorNdx // seqLength):
+            if ndx == anchorNdx:
+                # or (ndx // seqLength) == (anchorNdx // seqLength):
                 nonNegatives.append(ndx)
                 continue
             sub = iou[anchorNdx][ndx] - iou[ndx][anchorNdx]

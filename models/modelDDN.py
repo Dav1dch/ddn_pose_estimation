@@ -7,7 +7,7 @@ from math import degrees
 from ddn.pytorch.node import AbstractDeclarativeNode, DeclarativeLayer
 
 from weightedPnP import NonlinearWeightedBlindPnP
-from models.matching import Matching
+from utils.models.matching import Matching
 import matplotlib.pyplot as plt
 
 K = torch.tensor([[532.0, 0, 320.0], [0.0, 531.0, 240.0], [0.0, 0.0, 1.0]]).cuda()
